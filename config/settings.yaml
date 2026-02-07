@@ -1,0 +1,14 @@
+broker:
+  active: easytrader          # 切换为 "qmt" 即可切换实现
+  easytrader:
+    broker_name: ht            # 券商：ht/yh/gj 等
+    account: "${BROKER_ACCOUNT}"
+    password: "${BROKER_PASSWORD}"
+    exe_path: ""
+  qmt:
+    path: ""
+    account_id: ""
+
+logging:
+  level: INFO
+  file_path: logs/quant_engine.log

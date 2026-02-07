@@ -1,0 +1,12 @@
+[project]
+name = "quant-engine"
+version = "0.1.0"
+description = "A股量化交易平台"
+requires-python = ">=3.10"
+dependencies = [
+    "easytrader>=0.22",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+quant = "runtime.cli:main"
