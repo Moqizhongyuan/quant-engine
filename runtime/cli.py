@@ -52,6 +52,14 @@ def _handle_trade(args: argparse.Namespace, settings: dict) -> None:
               f"{symbol} {quantity}股 @ {price}")
 
 
+def _handle_cancel(args: argparse.Namespace, settings: dict) -> None:
+    """处理撤单子命令。"""
+    order_id: str = args.order_id
+    with create_broker(settings) as broker:
+        broker.cancel_order(order_id)
+        print(f"撤单成功 | 订单号: {order_id}")
+
+
 def _handle_query(args: argparse.Namespace, settings: dict) -> None:
     """处理查询子命令（positions/account/orders）。"""
     with create_broker(settings) as broker:
@@ -100,10 +108,20 @@ def build_parser() -> argparse.ArgumentParser:
 
     # trade 子命令
     trade_parser = subparsers.add_parser("trade", help="交易操作")
-    trade_parser.add_argument("action", choices=["buy", "sell"], help="买入或卖出")
-    trade_parser.add_argument("--symbol", required=True, help="股票代码，如 000001")
-    trade_parser.add_argument("--quantity", type=int, required=True, help="委托数量")
-    trade_parser.add_argument("--price", required=True, help="委托价格")
+    trade_sub = trade_parser.add_subparsers(dest="action", required=True)
+
+    buy_parser = trade_sub.add_parser("buy", help="买入")
+    buy_parser.add_argument("--symbol", required=True, help="股票代码，如 000001")
+    buy_parser.add_argument("--quantity", type=int, required=True, help="委托数量")
+    buy_parser.add_argument("--price", required=True, help="委托价格")
+
+    sell_parser = trade_sub.add_parser("sell", help="卖出")
+    sell_parser.add_argument("--symbol", required=True, help="股票代码，如 000001")
+    sell_parser.add_argument("--quantity", type=int, required=True, help="委托数量")
+    sell_parser.add_argument("--price", required=True, help="委托价格")
+
+    cancel_parser = trade_sub.add_parser("cancel", help="撤单")
+    cancel_parser.add_argument("--order-id", required=True, help="要撤销的订单号")
 
     # query 子命令
     query_parser = subparsers.add_parser("query", help="查询操作")
@@ -123,7 +141,10 @@ def main() -> None:
         settings = _init()
 
         if args.command == "trade":
-            _handle_trade(args, settings)
+            if args.action == "cancel":
+                _handle_cancel(args, settings)
+            else:
+                _handle_trade(args, settings)
         elif args.command == "query":
             _handle_query(args, settings)
     except QuantEngineError as e:
